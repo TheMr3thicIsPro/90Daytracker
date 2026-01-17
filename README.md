@@ -80,6 +80,17 @@ Data is stored locally in your browser using localStorage. You can export/import
 2. Set the buildpack to Node.js
 3. Deploy the code - Heroku will automatically run `npm start`
 
+### Deploy to Vercel (recommended for static sites)
+
+For static hosting on Vercel:
+
+1. Connect your GitHub repository to Vercel
+2. Vercel will automatically detect and build the project
+3. The `vercel.json` file handles routing for SPA functionality
+4. No server-side processing needed - all data is stored in browser's localStorage
+
+Note: For Vercel deployment, the application works as a static site. The server.js file is provided for self-hosting with Node.js but is not needed for Vercel deployment.
+
 ## Data Model
 
 The app stores a single JSON object with:
