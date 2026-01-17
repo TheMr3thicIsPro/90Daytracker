@@ -126,7 +126,10 @@ class WinTrackerApp {
         document.getElementById('word-count').textContent = wordCount;
         
         const saveBtn = document.getElementById('save-dream-btn');
+        const startBtn = document.getElementById('start-challenge-btn');
+        
         saveBtn.disabled = wordCount < 500;
+        startBtn.disabled = wordCount < 500;
     }
 
     countWords(text) {
@@ -135,10 +138,17 @@ class WinTrackerApp {
 
     saveDream() {
         const dreamText = document.getElementById('dream-textarea').value.trim();
-        if (this.countWords(dreamText) >= 500) {
+        const wordCount = this.countWords(dreamText);
+        
+        if (wordCount >= 500) {
             this.data.dreamText = dreamText;
             this.saveToStorage();
             this.showToast('Dream saved successfully!', 'success');
+            
+            // Enable the start challenge button
+            document.getElementById('start-challenge-btn').disabled = false;
+        } else {
+            this.showToast('Please enter at least 500 words', 'error');
         }
     }
 
