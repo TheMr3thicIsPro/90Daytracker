@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>90 Day Win Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Landing Page -->
+        <div id="landing-page" class="page active">
+            <div class="container">
+                <div class="landing-content">
+                    <h1 class="main-title">I WANT</h1>
+                    <p class="subtitle">Write a vivid description of your dream life. Be specific, detailed, and emotional. This will be your North Star for the next 90 days.</p>
+                    
+                    <div class="dream-text-container">
+                        <textarea id="dream-textarea" placeholder="Describe your ideal life in detail..."></textarea>
+                        <div class="word-counter">
+                            <span id="word-count">0</span>/500 words
+                        </div>
+                        <button id="save-dream-btn" class="btn btn-primary" disabled>Save Dream</button>
+                    </div>
+                    
+                    <div class="start-section">
+                        <button id="start-challenge-btn" class="btn btn-secondary" disabled>Start My 90 Days</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Dashboard Page -->
+        <div id="dashboard" class="page">
+            <div class="container-fluid">
+                <!-- Top Header -->
+                <header class="top-header">
+                    <div class="quote-section">
+                        <p class="quote">"Miss one day that's a mistake. Miss 2 days that's a start of a new habit"</p>
+                    </div>
+                    
+                    <div class="date-streak-section">
+                        <div class="date-info">
+                            <div class="current-date" id="current-date">Loading...</div>
+                            <div class="day-progress" id="day-progress">Day <span id="current-day">1</span>/90</div>
+                        </div>
+                        
+                        <div class="streaks">
+                            <div class="streak-item">
+                                <span class="streak-icon">🔥</span>
+                                <span class="streak-value" id="current-win-streak">0</span>
+                                <span class="streak-label">Win Streak</span>
+                            </div>
+                            <div class="streak-item">
+                                <span class="streak-icon">🏆</span>
+                                <span class="streak-value" id="longest-win-streak">0</span>
+                                <span class="streak-label">Longest</span>
+                            </div>
+                            <div class="streak-item">
+                                <span class="streak-icon">💀</span>
+                                <span class="streak-value" id="current-loss-streak">0</span>
+                                <span class="streak-label">Loss Streak</span>
+                            </div>
+                        </div>
+                        
+                        <div class="controls">
+                            <div class="sound-toggle">
+                                <label for="sound-toggle">Layout Design:</label>
+                                <input type="checkbox" id="sound-toggle" checked>
+                            </div>
+                            
+                            <div class="theme-selector">
+                                <select id="theme-select">
+                                    <option value="cyberpunk">Cyberpunk Neon</option>
+                                    <option value="minimal">Minimal Black & Gold</option>
+                                    <option value="soft">Soft Dark</option>
+                                    <option value="hardcore">Hardcore Discipline</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="loss-warning" class="warning-banner hidden">
+                        ⚠️ WARNING: 2 losses in a row will break your streak permanently!
+                    </div>
+                </header>
+                
+                <!-- Main Dashboard Layout -->
+                <div class="dashboard-layout">
+                    <!-- Left Column - Daily Actions -->
+                    <div class="left-column">
+                        <div class="card daily-actions-card">
+                            <h2>Today's Non Negotiables</h2>
+                            
+                            <div class="checklist">
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="shower-check" class="check-input">
+                                    <label for="shower-check" class="check-label">
+                                        <div class="check-content">
+                                            <span class="check-text">Shower</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="clean-check" class="check-input">
+                                    <label for="clean-check" class="check-label">
+                                        <div class="check-content">
+                                            <span class="check-text">Clean</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="pushups-check" class="check-input">
+                                    <label for="pushups-check" class="check-label">
+                                        <div class="check-content">
+                                            <span class="check-text">Pushups <span id="pushup-target">25</span></span>
+                                        </div>
+                                    </label>
+                                </div>
+                                
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="journal-check" class="check-input" disabled>
+                                    <label for="journal-check" class="check-label">
+                                        <div class="check-content">
+                                            <span class="check-text">Daily Journal Done</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="progress-section">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="daily-progress-fill"></div>
+                                </div>
+                                <div class="progress-text">
+                                    <span id="completed-tasks">0</span>/4 completed
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Center Column - Journal -->
+                    <div class="center-column">
+                        <div class="card journal-card">
+                            <h2>Daily Journal</h2>
+                            
+                            <div class="journal-section">
+                                <h3>Grateful For (3 items)</h3>
+                                <div class="gratitude-items">
+                                    <input type="text" class="gratitude-input" placeholder="I'm grateful for..." maxlength="100">
+                                    <input type="text" class="gratitude-input" placeholder="I'm grateful for..." maxlength="100">
+                                    <input type="text" class="gratitude-input" placeholder="I'm grateful for..." maxlength="100">
+                                </div>
+                            </div>
+                            
+                            <div class="journal-section">
+                                <h3>Day Summary</h3>
+                                <textarea id="day-summary" placeholder="Write about your day..."></textarea>
+                                <div class="word-counter">
+                                    <span id="summary-word-count">0</span>/100 words
+                                </div>
+                            </div>
+                            
+                            <div class="journal-section">
+                                <h3>Day Rating</h3>
+                                <div class="rating-slider">
+                                    <input type="range" id="day-rating" min="1" max="10" value="5">
+                                    <div class="rating-display">
+                                        <span id="rating-value">5</span>/10
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button id="submit-journal-btn" class="btn btn-primary" disabled>Submit Journal</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column - Extras -->
+                    <div class="right-column">
+                        <div class="card">
+                            <h2>Your Goal</h2>
+                            <div id="dream-text-section">
+                                <p id="dream-text-display"></p>
+                                <button id="edit-dream-btn" class="btn btn-small">Edit Goal</button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h2>To-Do List</h2>
+                            <div class="todo-section">
+                                <div class="todo-input-section">
+                                    <input type="text" id="todo-input" placeholder="Add new task...">
+                                    <button id="add-todo-btn" class="btn btn-small">+</button>
+                                </div>
+                                <div id="todo-list" class="todo-list">
+                                    <!-- Todo items will be added here -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h2>Reminders</h2>
+                            <div class="reminder-section">
+                                <div class="reminder-input-section">
+                                    <input type="time" id="reminder-time">
+                                    <input type="text" id="reminder-text" placeholder="Reminder note...">
+                                    <button id="add-reminder-btn" class="btn btn-small">+</button>
+                                </div>
+                                <div id="reminders-list" class="reminders-list">
+                                    <!-- Reminder items will be added here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 90-Day Calendar Section -->
+                <div class="calendar-section">
+                    <h2>90 Day Journey</h2>
+                    <div class="calendar-grid" id="calendar-grid">
+                        <!-- Calendar days will be generated here -->
+                    </div>
+                    <button id="end-day-btn" class="btn btn-danger">End Day</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal for day details -->
+        <div id="day-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-day-title">Day Details</h3>
+                    <button id="close-modal" class="btn btn-small">&times;</button>
+                </div>
+                <div class="modal-body" id="modal-body">
+                    <!-- Day details will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
