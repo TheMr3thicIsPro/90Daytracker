@@ -1,3 +1,4 @@
+/* jshint esversion: 6 */
 // 90 Day Win Tracker Application
 class WinTrackerApp {
     constructor() {

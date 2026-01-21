@@ -1,0 +1,9 @@
+{
+  "esversion": 6,
+  "browser": true,
+  "node": false,
+  "globals": {
+    "module": true,
+    "require": true
+  }
+}
