@@ -1,0 +1,114 @@
+{
+  "startDate": "2026-01-17T00:00:00.000Z",
+  "theme": "cyberpunk",
+  "soundEnabled": true,
+  "dreamText": "My dream life is one of continuous growth, health, and fulfillment. I wake up each morning excited about the day ahead, knowing that I am actively working towards my goals. I am physically fit and strong, having built consistent habits that serve my wellbeing. My mind is sharp and focused, capable of deep work and creative thinking. I have meaningful relationships with people who inspire and support me. I contribute positively to my community and make a difference in the world. My finances are stable and growing, providing security and freedom to pursue my passions. I travel to new places, learn continuously, and challenge myself regularly. I am surrounded by beauty, peace, and abundance. Every day brings new opportunities to grow and become the best version of myself.",
+  "days": [
+    {
+      "date": "2026-01-17T00:00:00.000Z",
+      "checklist": {
+        "shower": true,
+        "clean": true,
+        "pushups": true,
+        "journalDone": true
+      },
+      "pushupTarget": 25,
+      "journal": {
+        "gratitude": [
+          "I'm grateful for my health and energy",
+          "I'm grateful for the opportunity to grow",
+          "I'm grateful for supportive relationships"
+        ],
+        "summary": "Started my 90-day journey today. Felt energized and motivated to begin this transformation. Completed all non-negotiables and reflected on my goals in the journal. The pushups were challenging but manageable. Looking forward to tomorrow.",
+        "rating": 8
+      },
+      "status": "win",
+      "timestamp": 1737081600000
+    },
+    {
+      "date": "2026-01-18T00:00:00.000Z",
+      "checklist": {
+        "shower": true,
+        "clean": true,
+        "pushups": true,
+        "journalDone": true
+      },
+      "pushupTarget": 26,
+      "journal": {
+        "gratitude": [
+          "I'm grateful for yesterday's progress",
+          "I'm grateful for my discipline",
+          "I'm grateful for small wins"
+        ],
+        "summary": "Second day in and feeling good. The routine is starting to feel more natural. Pushed through 26 pushups today. Journaling helps me reflect on my intentions. Maintaining momentum is key.",
+        "rating": 7
+      },
+      "status": "win",
+      "timestamp": 1737168000000
+    },
+    {
+      "date": "2026-01-19T00:00:00.000Z",
+      "checklist": {
+        "shower": true,
+        "clean": true,
+        "pushups": false,
+        "journalDone": false
+      },
+      "pushupTarget": 27,
+      "journal": {
+        "gratitude": [
+          "",
+          "",
+          ""
+        ],
+        "summary": "",
+        "rating": 5
+      },
+      "status": "current",
+      "timestamp": 1737254400000
+    }
+  ],
+  "todos": [
+    {
+      "id": 1705488000000,
+      "text": "Complete morning routine",
+      "completed": true,
+      "createdAt": "2026-01-17T08:00:00.000Z"
+    },
+    {
+      "id": 1705488000001,
+      "text": "Read for 30 minutes",
+      "completed": false,
+      "createdAt": "2026-01-17T08:00:00.000Z"
+    },
+    {
+      "id": 1705488000002,
+      "text": "Plan weekly goals",
+      "completed": false,
+      "createdAt": "2026-01-18T08:00:00.000Z"
+    }
+  ],
+  "reminders": [
+    {
+      "id": 1705488000003,
+      "time": "07:00",
+      "text": "Morning routine",
+      "completed": true,
+      "createdAt": "2026-01-17T08:00:00.000Z"
+    },
+    {
+      "id": 1705488000004,
+      "time": "20:00",
+      "text": "Evening reflection",
+      "completed": false,
+      "createdAt": "2026-01-17T08:00:00.000Z"
+    }
+  ],
+  "stats": {
+    "currentWinStreak": 2,
+    "longestWinStreak": 2,
+    "currentLossStreak": 0,
+    "daysWon": 2,
+    "daysLost": 0
+  }
+}
