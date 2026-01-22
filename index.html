@@ -1,246 +1,1172 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>90 Day Win Tracker</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-</head>
-<body>
-    <div id="app">
-        <!-- Landing Page -->
-        <div id="landing-page" class="page active">
-            <div class="container">
-                <div class="landing-content">
-                    <h1 class="main-title">I WANT</h1>
-                    <p class="subtitle">Write a vivid description of your dream life. Be specific, detailed, and emotional. This will be your North Star for the next 90 days.</p>
-                    
-                    <div class="dream-text-container">
-                        <textarea id="dream-textarea" placeholder="Describe your ideal life in detail..."></textarea>
-                        <div class="word-counter">
-                            <span id="word-count">0</span>/500 words
-                        </div>
-                        <button id="save-dream-btn" class="btn btn-primary" disabled>Save Dream</button>
-                    </div>
-                    
-                    <div class="start-section">
-                        <button id="start-challenge-btn" class="btn btn-secondary" disabled>Start My 90 Days</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+/* jshint esversion: 6 */
+// 90 Day Win Tracker Application
+class WinTrackerApp {
+    constructor() {
+        this.data = this.loadFromStorage();
+        this.currentView = 'landing';
         
-        <!-- Dashboard Page -->
-        <div id="dashboard" class="page">
-            <div class="container-fluid">
-                <!-- Top Header -->
-                <header class="top-header">
-                    <div class="quote-section">
-                        <p class="quote">"Miss one day that's a mistake. Miss 2 days that's a start of a new habit"</p>
-                    </div>
-                    
-                    <div class="date-streak-section">
-                        <div class="date-info">
-                            <div class="current-date" id="current-date">Loading...</div>
-                            <div class="day-progress" id="day-progress">Day <span id="current-day">1</span>/90</div>
-                        </div>
-                        
-                        <div class="streaks">
-                            <div class="streak-item">
-                                <span class="streak-icon">🔥</span>
-                                <span class="streak-value" id="current-win-streak">0</span>
-                                <span class="streak-label">Win Streak</span>
-                            </div>
-                            <div class="streak-item">
-                                <span class="streak-icon">🏆</span>
-                                <span class="streak-value" id="longest-win-streak">0</span>
-                                <span class="streak-label">Longest</span>
-                            </div>
-                            <div class="streak-item">
-                                <span class="streak-icon">💀</span>
-                                <span class="streak-value" id="current-loss-streak">0</span>
-                                <span class="streak-label">Loss Streak</span>
-                            </div>
-                        </div>
-                        
-                        <div class="controls">
-                            <div class="sound-toggle">
-                                <label for="sound-toggle">Layout Design:</label>
-                                <input type="checkbox" id="sound-toggle" checked>
-                            </div>
-                            
-                            <div class="theme-selector">
-                                <select id="theme-select">
-                                    <option value="cyberpunk">Cyberpunk Neon</option>
-                                    <option value="minimal">Minimal Black & Gold</option>
-                                    <option value="soft">Soft Dark</option>
-                                    <option value="hardcore">Hardcore Discipline</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div id="loss-warning" class="warning-banner hidden">
-                        ⚠️ WARNING: 2 losses in a row will break your streak permanently!
-                    </div>
-                </header>
-                
-                <!-- Main Dashboard Layout -->
-                <div class="dashboard-layout">
-                    <!-- Left Column - Daily Actions -->
-                    <div class="left-column">
-                        <div class="card daily-actions-card">
-                            <h2>Today's Non Negotiables</h2>
-                            
-                            <div class="checklist">
-                                <div class="checklist-item">
-                                    <input type="checkbox" id="shower-check" class="check-input">
-                                    <label for="shower-check" class="check-label">
-                                        <div class="check-content">
-                                            <span class="check-text">Shower</span>
-                                        </div>
-                                    </label>
-                                </div>
-                                
-                                <div class="checklist-item">
-                                    <input type="checkbox" id="clean-check" class="check-input">
-                                    <label for="clean-check" class="check-label">
-                                        <div class="check-content">
-                                            <span class="check-text">Clean</span>
-                                        </div>
-                                    </label>
-                                </div>
-                                
-                                <div class="checklist-item">
-                                    <input type="checkbox" id="pushups-check" class="check-input">
-                                    <label for="pushups-check" class="check-label">
-                                        <div class="check-content">
-                                            <span class="check-text">Pushups <span id="pushup-target">25</span></span>
-                                        </div>
-                                    </label>
-                                </div>
-                                
-                                <div class="checklist-item">
-                                    <input type="checkbox" id="journal-check" class="check-input" disabled>
-                                    <label for="journal-check" class="check-label">
-                                        <div class="check-content">
-                                            <span class="check-text">Daily Journal Done</span>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <div class="progress-section">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" id="daily-progress-fill"></div>
-                                </div>
-                                <div class="progress-text">
-                                    <span id="completed-tasks">0</span>/4 completed
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Center Column - Journal -->
-                    <div class="center-column">
-                        <div class="card journal-card">
-                            <h2>Daily Journal</h2>
-                            
-                            <div class="journal-section">
-                                <h3>Grateful For (3 items)</h3>
-                                <div class="gratitude-items">
-                                    <input type="text" class="gratitude-input" placeholder="I'm grateful for..." maxlength="100">
-                                    <input type="text" class="gratitude-input" placeholder="I'm grateful for..." maxlength="100">
-                                    <input type="text" class="gratitude-input" placeholder="I'm grateful for..." maxlength="100">
-                                </div>
-                            </div>
-                            
-                            <div class="journal-section">
-                                <h3>Day Summary</h3>
-                                <textarea id="day-summary" placeholder="Write about your day..."></textarea>
-                                <div class="word-counter">
-                                    <span id="summary-word-count">0</span>/100 words
-                                </div>
-                            </div>
-                            
-                            <div class="journal-section">
-                                <h3>Day Rating</h3>
-                                <div class="rating-slider">
-                                    <input type="range" id="day-rating" min="1" max="10" value="5">
-                                    <div class="rating-display">
-                                        <span id="rating-value">5</span>/10
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <button id="submit-journal-btn" class="btn btn-primary" disabled>Submit Journal</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Right Column - Extras -->
-                    <div class="right-column">
-                        <div class="card">
-                            <h2>Your Goal</h2>
-                            <div id="dream-text-section">
-                                <p id="dream-text-display"></p>
-                                <button id="edit-dream-btn" class="btn btn-small">Edit Goal</button>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <h2>To-Do List</h2>
-                            <div class="todo-section">
-                                <div class="todo-input-section">
-                                    <input type="text" id="todo-input" placeholder="Add new task...">
-                                    <button id="add-todo-btn" class="btn btn-small">+</button>
-                                </div>
-                                <div id="todo-list" class="todo-list">
-                                    <!-- Todo items will be added here -->
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="card">
-                            <h2>Reminders</h2>
-                            <div class="reminder-section">
-                                <div class="reminder-input-section">
-                                    <input type="time" id="reminder-time">
-                                    <input type="text" id="reminder-text" placeholder="Reminder note...">
-                                    <button id="add-reminder-btn" class="btn btn-small">+</button>
-                                </div>
-                                <div id="reminders-list" class="reminders-list">
-                                    <!-- Reminder items will be added here -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 90-Day Calendar Section -->
-                <div class="calendar-section">
-                    <h2>90 Day Journey</h2>
-                    <div class="calendar-grid" id="calendar-grid">
-                        <!-- Calendar days will be generated here -->
-                    </div>
-                    <button id="end-day-btn" class="btn btn-danger">End Day</button>
-                </div>
-            </div>
-        </div>
+        // Game configuration
+        this.gameConfig = {
+            // Task rewards
+            baseXPPerTask: 10,
+            baseCoinsPerTask: 5,
+            bonusXPForAllTasks: 20,
+            bonusCoinsForAllTasks: 10,
+            
+            // Streak multiplier
+            streakMultiplierIncrement: 0.1, // +0.1 every X days
+            streakMultiplierInterval: 3,
+            maxStreakMultiplier: 2.0,
+            
+            // Level curve
+            levelCurveBase: 100,
+            levelCurveFactor: 35,
+            maxLevel: 50,
+            
+            // Crate costs
+            basicCrateCost: 50,
+            premiumCrateCost: 150,
+            
+            // Shield mechanics
+            shieldRewardInterval: 14,
+            
+            // Drop rates (percentages) for Basic Crate
+            basicCrateDrops: {
+                common: 70,
+                uncommon: 20,
+                rare: 8,
+                epic: 1.8,
+                legendary: 0.2
+            },
+            
+            // Drop rates (percentages) for Premium Crate
+            premiumCrateDrops: {
+                common: 45,
+                uncommon: 30,
+                rare: 18,
+                epic: 6,
+                legendary: 1
+            },
+            
+            // Duplicate refund values
+            duplicateRefund: {
+                common: 5,
+                uncommon: 10,
+                rare: 25,
+                epic: 60,
+                legendary: 150
+            }
+        };
+
+        // Check for test mode parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('test') === 'true' || this.data.testMode) {
+            // Only enable test mode if explicitly requested via URL
+            if (urlParams.get('test') === 'true') {
+                this.enableTestMode();
+            }
+        }
+
+        this.init();
+    }
+
+    init() {
+        this.setupEventListeners();
+        this.updateTheme();
+        this.renderApp();
+        this.startPeriodicSave();
+    }
+
+    setupEventListeners() {
+        // Landing page events
+        document.getElementById('dream-textarea').addEventListener('input', this.handleDreamInput.bind(this));
+        document.getElementById('save-dream-btn').addEventListener('click', this.saveDream.bind(this));
+        document.getElementById('start-challenge-btn').addEventListener('click', this.startChallenge.bind(this));
+
+        // Dashboard events
+        document.getElementById('sound-toggle').addEventListener('change', this.toggleLayoutDesign.bind(this));
+        document.getElementById('theme-select').addEventListener('change', this.changeTheme.bind(this));
         
-        <!-- Modal for day details -->
-        <div id="day-modal" class="modal hidden">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 id="modal-day-title">Day Details</h3>
-                    <button id="close-modal" class="btn btn-small">&times;</button>
-                </div>
-                <div class="modal-body" id="modal-body">
-                    <!-- Day details will be populated here -->
-                </div>
-            </div>
-        </div>
-    </div>
+        // Checklist events
+        document.querySelectorAll('.check-input').forEach(input => {
+            input.addEventListener('change', this.handleChecklistChange.bind(this));
+        });
+
+        // Journal events
+        document.querySelectorAll('.gratitude-input').forEach(input => {
+            input.addEventListener('input', this.validateJournal.bind(this));
+        });
+        document.getElementById('day-summary').addEventListener('input', this.handleSummaryInput.bind(this));
+        document.getElementById('day-rating').addEventListener('input', this.updateRatingDisplay.bind(this));
+        document.getElementById('submit-journal-btn').addEventListener('click', this.submitJournal.bind(this));
+
+        // Goal section events
+        document.getElementById('edit-dream-btn').addEventListener('click', () => {
+            // Navigate back to landing page to edit the goal
+            document.getElementById('landing-page').classList.add('active');
+            document.getElementById('dashboard').classList.remove('active');
+            this.currentView = 'landing';
+            
+            // Load the current dream text into the textarea
+            document.getElementById('dream-textarea').value = this.data.dreamText;
+            const wordCount = this.countWords(this.data.dreamText);
+            document.getElementById('word-count').textContent = wordCount;
+            
+            // Enable buttons based on word count
+            document.getElementById('save-dream-btn').disabled = wordCount < 500;
+            document.getElementById('start-challenge-btn').disabled = wordCount < 500;
+        });
+        
+        // To-Do events
+        document.getElementById('add-todo-btn').addEventListener('click', this.addTodo.bind(this));
+        document.getElementById('todo-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.addTodo();
+        });
+
+        // Reminder events
+        document.getElementById('add-reminder-btn').addEventListener('click', this.addReminder.bind(this));
+
+        // Calendar events
+        document.getElementById('end-day-btn').addEventListener('click', this.endDay.bind(this));
+
+        // Modal events
+        document.getElementById('close-modal').addEventListener('click', this.closeModal.bind(this));
+
+        // Handle window blur/focus for data persistence
+        window.addEventListener('blur', () => this.saveToStorage());
+        window.addEventListener('beforeunload', () => this.saveToStorage());
+    }
+
+    loadFromStorage() {
+        const savedData = localStorage.getItem('winTrackerData');
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            // Ensure game state exists
+            if (!data.gameState) {
+                data.gameState = this.getDefaultGameState();
+            }
+            return data;
+        }
+
+        // Default data structure
+        return {
+            startDate: null,
+            theme: 'cyberpunk',
+            soundEnabled: true,
+            layoutDesignEnabled: true,
+            dreamText: '',
+            testMode: false,  // Added test mode flag
+            days: [],
+            todos: [],
+            reminders: [],
+            stats: {
+                currentWinStreak: 0,
+                longestWinStreak: 0,
+                currentLossStreak: 0,
+                daysWon: 0,
+                daysLost: 0
+            },
+            gameState: this.getDefaultGameState(),
+            userId: null  // Added for cloud sync
+        };
+    }
+
+    getDefaultGameState() {
+        return {
+            version: 2,
+            streak: {
+                current: 0,
+                best: 0,
+                lastCompleteDate: null,
+                shields: 0
+            },
+            xp: {
+                level: 1,
+                currentXP: 0,
+                totalXP: 0
+            },
+            coins: 0,
+            cosmetics: {
+                owned: {},
+                equipped: {}
+            },
+            crateHistory: []
+        };
+    }
+
+    saveToStorage() {
+        // Auto-save game state before storing
+        this.processEndOfDayIfNeeded();
+        localStorage.setItem('winTrackerData', JSON.stringify(this.data));
+        
+        // Attempt to sync to cloud if user has an ID
+        if (this.data.userId) {
+            this.syncToCloud();
+        }
+    }
+
+    startPeriodicSave() {
+        setInterval(() => {
+            this.saveToStorage();
+        }, 5000); // Save every 5 seconds
+    }
+
+    handleDreamInput(e) {
+        const textarea = e.target;
+        const wordCount = this.countWords(textarea.value);
+        document.getElementById('word-count').textContent = wordCount;
+        
+        const saveBtn = document.getElementById('save-dream-btn');
+        const startBtn = document.getElementById('start-challenge-btn');
+        
+        saveBtn.disabled = wordCount < 500;
+        startBtn.disabled = wordCount < 500;
+    }
+
+    countWords(text) {
+        return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+    }
+
+    saveDream() {
+        const dreamText = document.getElementById('dream-textarea').value.trim();
+        const wordCount = this.countWords(dreamText);
+        
+        if (wordCount >= 500) {
+            this.data.dreamText = dreamText;
+            this.saveToStorage();
+            this.showToast('Dream saved successfully!', 'success');
+            
+            // Enable the start challenge button
+            document.getElementById('start-challenge-btn').disabled = false;
+        } else {
+            this.showToast('Please enter at least 500 words', 'error');
+        }
+    }
+
+    startChallenge() {
+        if (!this.data.dreamText || this.countWords(this.data.dreamText) < 500) {
+            this.showToast('Please save your dream first (minimum 500 words)', 'error');
+            return;
+        }
+
+        if (!this.data.startDate) {
+            this.data.startDate = new Date().toISOString();
+            
+            // Initialize 90 days of data
+            const start = new Date(this.data.startDate);
+            for (let i = 0; i < 90; i++) {
+                const dayDate = new Date(start);
+                dayDate.setDate(start.getDate() + i);
+                
+                this.data.days.push({
+                    date: dayDate.toISOString(),
+                    checklist: {
+                        shower: false,
+                        clean: false,
+                        pushups: false,
+                        journalDone: false
+                    },
+                    pushupTarget: 25 + i, // Start at 25 and increase by 1 each day
+                    journal: {
+                        gratitude: ['', '', ''],
+                        summary: '',
+                        rating: 5
+                    },
+                    status: i === 0 ? 'current' : 'future', // First day is current, rest are future
+                    timestamp: Date.now()
+                });
+            }
+            
+            this.saveToStorage();
+            this.showToast('Challenge started! Good luck with your 90 days.', 'success');
+        }
+
+        this.switchToDashboard();
+        this.updateDashboard(); // Ensure all sections are updated
+    }
+
+    switchToDashboard() {
+        document.getElementById('landing-page').classList.remove('active');
+        document.getElementById('dashboard').classList.add('active');
+        this.currentView = 'dashboard';
+        this.updateDashboard();
+    }
+
+    updateDashboard() {\n        if (!this.data.startDate) return;\n\n        const currentDate = new Date();\n        const startDate = new Date(this.data.startDate);\n        const currentDayIndex = Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24));\n        \n        // Update current day info\n        document.getElementById('current-date').textContent = currentDate.toLocaleDateString('en-US', {\n            weekday: 'long',\n            year: 'numeric',\n            month: 'long',\n            day: 'numeric'\n        });\n        \n        document.getElementById('current-day').textContent = Math.max(1, currentDayIndex + 1);\n\n        // Update streaks\n        this.updateStreaks();\n\n        // Update RPG stats\n        this.updateRPGStats();\n\n        // Update daily actions\n        this.updateDailyActions(currentDayIndex);\n\n        // Update journal\n        this.updateJournal(currentDayIndex);\n\n        // Update calendar\n        this.renderCalendar();\n\n        // Update to-do list\n        this.renderTodoList();\n\n        // Update dream text section\n        this.updateDreamTextSection();\n        \n        // Update reminders\n        this.renderReminders();\n        \n        // Update character\n        this.renderCharacter();\n    }\n\n    updateRPGStats() {\n        // Update streak display\n        if (document.getElementById('current-streak')) {\n            document.getElementById('current-streak').textContent = this.data.gameState.streak.current;\n        }\n        \n        // Update best streak display\n        if (document.getElementById('best-streak')) {\n            document.getElementById('best-streak').textContent = this.data.gameState.streak.best;\n        }\n        \n        // Update shields display\n        if (document.getElementById('shield-count')) {\n            document.getElementById('shield-count').textContent = this.data.gameState.streak.shields;\n        }\n        \n        // Update XP display\n        if (document.getElementById('current-xp')) {\n            document.getElementById('current-xp').textContent = this.data.gameState.xp.currentXP;\n        }\n        \n        if (document.getElementById('xp-level')) {\n            document.getElementById('xp-level').textContent = this.data.gameState.xp.level;\n        }\n        \n        // Update XP progress bar\n        if (document.getElementById('xp-progress')) {\n            const nextLevelXp = this.getNextLevelXp();\n            const progressPercent = (this.data.gameState.xp.currentXP / nextLevelXp) * 100;\n            document.getElementById('xp-progress').style.width = Math.min(100, progressPercent) + '%';\n        }\n        \n        // Update coins display\n        if (document.getElementById('coin-count')) {\n            document.getElementById('coin-count').textContent = this.data.gameState.coins;\n        }\n        \n        // Update streak multiplier\n        if (document.getElementById('streak-multiplier')) {\n            const multiplier = this.calculateStreakMultiplier();\n            document.getElementById('streak-multiplier').textContent = multiplier.toFixed(1) + 'x';\n        }\n    }
+
+    updateStreaks() {
+        const { currentWinStreak, longestWinStreak, currentLossStreak } = this.data.stats;
+        
+        document.getElementById('current-win-streak').textContent = currentWinStreak;
+        document.getElementById('longest-win-streak').textContent = longestWinStreak;
+        document.getElementById('current-loss-streak').textContent = currentLossStreak;
+
+        // Show warning if about to lose streak
+        const warningBanner = document.getElementById('loss-warning');
+        if (currentLossStreak >= 1) {
+            warningBanner.classList.remove('hidden');
+            if (this.data.layoutDesignEnabled) {
+                this.playSound('warning');
+            }
+        } else {
+            warningBanner.classList.add('hidden');
+        }
+    }
+
+    updateDailyActions(dayIndex) {
+        if (dayIndex < 0 || dayIndex >= this.data.days.length) return;
+
+        const day = this.data.days[dayIndex];
+        const checklist = day.checklist;
+
+        // Update checklist inputs
+        document.getElementById('shower-check').checked = checklist.shower;
+        document.getElementById('clean-check').checked = checklist.clean;
+        document.getElementById('pushups-check').checked = checklist.pushups;
+        document.getElementById('journal-check').checked = checklist.journalDone;
+        document.getElementById('journal-check').disabled = !checklist.journalDone;
+
+        // Update pushup target
+        document.getElementById('pushup-target').textContent = day.pushupTarget;
+
+        // Calculate and update progress
+        const completed = Object.values(checklist).filter(Boolean).length;
+        document.getElementById('completed-tasks').textContent = completed;
+        
+        const progressPercent = (completed / 4) * 100;
+        document.getElementById('daily-progress-fill').style.width = `${progressPercent}%`;
+    }
+
+    updateJournal(dayIndex) {
+        if (dayIndex < 0 || dayIndex >= this.data.days.length) return;
+
+        const day = this.data.days[dayIndex];
+        const journal = day.journal;
+
+        // Update gratitude inputs
+        document.querySelectorAll('.gratitude-input').forEach((input, index) => {
+            input.value = journal.gratitude[index] || '';
+        });
+
+        // Update summary
+        document.getElementById('day-summary').value = journal.summary;
+        const summaryWordCount = this.countWords(journal.summary);
+        document.getElementById('summary-word-count').textContent = summaryWordCount;
+
+        // Update rating
+        document.getElementById('day-rating').value = journal.rating;
+        document.getElementById('rating-value').textContent = journal.rating;
+
+        // Validate journal
+        this.validateJournal();
+    }
     
-    <script src="script.js"></script>
-</body>
-</html>
+    updateDreamTextSection() {
+        const dreamTextDisplay = document.getElementById('dream-text-display');
+        if (this.data.dreamText) {
+            dreamTextDisplay.textContent = this.data.dreamText;
+        }
+    }
+
+    renderCalendar() {
+        const calendarGrid = document.getElementById('calendar-grid');
+        calendarGrid.innerHTML = '';
+
+        const start = new Date(this.data.startDate);
+        for (let i = 0; i < 90; i++) {
+            const dayDate = new Date(start);
+            dayDate.setDate(start.getDate() + i);
+
+            const dayElement = document.createElement('div');
+            dayElement.className = `calendar-day ${this.data.days[i].status}`;
+            
+            if (this.data.days[i].status === 'current') {
+                dayElement.classList.add('today');
+            }
+
+            dayElement.innerHTML = `
+                <span class="day-number">${i + 1}</span>
+                <div class="day-actions">
+                    <span class="${this.data.days[i].checklist.shower ? 'completed' : 'pending'}">🚿</span>
+                    <span class="${this.data.days[i].checklist.clean ? 'completed' : 'pending'}">🧹</span>
+                    <span class="${this.data.days[i].checklist.pushups ? 'completed' : 'pending'}">💪</span>
+                    <span class="${this.data.days[i].checklist.journalDone ? 'completed' : 'pending'}">📝</span>
+                </div>
+            `;
+
+            (function(index) { dayElement.addEventListener('click', () => this.viewDayDetails(index)); }).call(this, i);
+            calendarGrid.appendChild(dayElement);
+        }
+    }
+
+    viewDayDetails(dayIndex) {
+        const day = this.data.days[dayIndex];
+        const date = new Date(day.date);
+        
+        const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modal-content');
+        
+        modalContent.innerHTML = `
+            <h3>Day ${dayIndex + 1} - ${date.toLocaleDateString()}</h3>
+            <div class="day-details">
+                <div class="checklist-summary">
+                    <h4>Daily Actions</h4>
+                    <ul>
+                        <li>Shower: ${day.checklist.shower ? '✅' : '❌'}</li>
+                        <li>Clean: ${day.checklist.clean ? '✅' : '❌'}</li>
+                        <li>Pushups: ${day.checklist.pushups ? '✅' : '❌'}</li>
+                        <li>Journal: ${day.checklist.journalDone ? '✅' : '❌'}</li>
+                    </ul>
+                </div>
+                <div class="journal-summary">
+                    <h4>Journal</h4>
+                    <p><strong>Gratitude:</strong> ${day.journal.gratitude.filter(g => g).join(', ')}</p>
+                    <p><strong>Summary:</strong> ${day.journal.summary.substring(0, 100)}${day.journal.summary.length > 100 ? '...' : ''}</p>
+                    <p><strong>Rating:</strong> ${day.journal.rating}/10</p>
+                </div>
+            </div>
+        `;
+        
+        modal.style.display = 'flex';
+    }
+
+    closeModal() {
+        document.getElementById('modal').style.display = 'none';
+    }
+
+    handleChecklistChange(e) {
+        const taskName = e.target.dataset.task;
+        const dayIndex = this.getCurrentDayIndex();
+        
+        if (dayIndex < 0 || dayIndex >= this.data.days.length) return;
+
+        // Only allow marking as done, not undone
+        if (e.target.checked && !this.data.days[dayIndex].checklist[taskName]) {
+            this.data.days[dayIndex].checklist[taskName] = true;
+            
+            // Process task completion for RPG rewards
+            this.processTaskCompletion(taskName);
+        } else if (!e.target.checked) {
+            // Prevent unchecking completed tasks
+            e.target.checked = this.data.days[dayIndex].checklist[taskName];
+            return;
+        }
+        
+        // If journal is marked as done, validate it
+        if (taskName === 'journalDone' && e.target.checked) {
+            if (!this.validateJournal()) {
+                e.target.checked = false;
+                this.data.days[dayIndex].checklist[taskName] = false;
+                return;
+            }
+        }
+        
+        this.saveToStorage();
+        this.updateDashboard();
+    }
+
+    validateJournal() {
+        const dayIndex = this.getCurrentDayIndex();
+        if (dayIndex < 0 || dayIndex >= this.data.days.length) return false;
+
+        const gratitudeInputs = document.querySelectorAll('.gratitude-input');
+        const summaryValue = document.getElementById('day-summary').value.trim();
+        const ratingValue = parseInt(document.getElementById('day-rating').value);
+
+        // Check if all gratitude fields are filled
+        let allGratitudeFilled = true;
+        gratitudeInputs.forEach(input => {
+            if (!input.value.trim()) {
+                allGratitudeFilled = false;
+            }
+        });
+
+        // Check if summary has at least 100 words
+        const summaryWordCount = this.countWords(summaryValue);
+        const hasEnoughSummary = summaryWordCount >= 100;
+
+        // Check if rating is valid
+        const isValidRating = ratingValue >= 1 && ratingValue <= 10;
+
+        const isValid = allGratitudeFilled && hasEnoughSummary && isValidRating;
+
+        // Update submit button state
+        document.getElementById('submit-journal-btn').disabled = !isValid;
+
+        return isValid;
+    }
+
+    submitJournal() {
+        const dayIndex = this.getCurrentDayIndex();
+        if (dayIndex < 0 || dayIndex >= this.data.days.length) return;
+
+        if (!this.validateJournal()) {
+            this.showToast('Please fill in all required journal fields', 'error');
+            return;
+        }
+
+        // Update journal data
+        document.querySelectorAll('.gratitude-input').forEach((input, index) => {
+            this.data.days[dayIndex].journal.gratitude[index] = input.value.trim();
+        });
+
+        this.data.days[dayIndex].journal.summary = document.getElementById('day-summary').value.trim();
+        this.data.days[dayIndex].journal.rating = parseInt(document.getElementById('day-rating').value);
+
+        // Mark journal as done
+        this.data.days[dayIndex].checklist.journalDone = true;
+
+        this.saveToStorage();
+        this.updateDashboard();
+        this.showToast('Journal submitted successfully!', 'success');
+    }
+
+    handleSummaryInput(e) {
+        const wordCount = this.countWords(e.target.value);
+        document.getElementById('summary-word-count').textContent = wordCount;
+        this.validateJournal();
+    }
+
+    updateRatingDisplay(e) {
+        document.getElementById('rating-value').textContent = e.target.value;
+        this.validateJournal();
+    }
+
+    getCurrentDayIndex() {
+        if (!this.data.startDate) return -1;
+
+        const currentDate = new Date();
+        const startDate = new Date(this.data.startDate);
+        return Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24));
+    }
+
+    endDay() {
+        const dayIndex = this.getCurrentDayIndex();
+        if (dayIndex < 0 || dayIndex >= this.data.days.length) return;
+
+        const day = this.data.days[dayIndex];
+        const completedTasks = Object.values(day.checklist).filter(Boolean).length;
+        const totalTasks = 4;
+
+        // Update streaks
+        if (completedTasks === totalTasks) {
+            // Won the day
+            this.data.stats.currentWinStreak++;
+            this.data.stats.daysWon++;
+            this.data.stats.currentLossStreak = 0;
+
+            if (this.data.stats.currentWinStreak > this.data.stats.longestWinStreak) {
+                this.data.stats.longestWinStreak = this.data.stats.currentWinStreak;
+            }
+        } else {
+            // Lost the day
+            this.data.stats.currentLossStreak++;
+            this.data.stats.currentWinStreak = 0;
+            this.data.stats.daysLost++;
+        }
+
+        // Mark today as past and tomorrow as current
+        if (dayIndex + 1 < this.data.days.length) {
+            this.data.days[dayIndex].status = 'past';
+            this.data.days[dayIndex + 1].status = 'current';
+        }
+
+        this.saveToStorage();
+        this.updateDashboard();
+        
+        this.showToast(
+            completedTasks === totalTasks ? 'Day won! Great job!' : 'Day ended. Better luck tomorrow!',
+            completedTasks === totalTasks ? 'success' : 'info'
+        );
+    }
+
+    renderTodoList() {
+        const todoList = document.getElementById('todo-list');
+        todoList.innerHTML = '';
+
+        this.data.todos.forEach((todo, index) => {
+            const todoElement = document.createElement('div');
+            todoElement.className = 'todo-item';
+            todoElement.innerHTML = `
+                <span class="todo-text">${todo.text}</span>
+                <div class="todo-actions">
+                    <button class="btn btn-small btn-danger" onclick="app.removeTodo(${index})">Remove</button>
+                </div>
+            `;
+            todoList.appendChild(todoElement);
+        });
+    }
+
+    addTodo() {
+        const input = document.getElementById('todo-input');
+        const text = input.value.trim();
+
+        if (text) {
+            this.data.todos.push({
+                text: text,
+                completed: false,
+                timestamp: Date.now()
+            });
+
+            input.value = '';
+            this.saveToStorage();
+            this.renderTodoList();
+        }
+    }
+
+    removeTodo(index) {
+        this.data.todos.splice(index, 1);
+        this.saveToStorage();
+        this.renderTodoList();
+    }
+
+    renderReminders() {
+        const reminderList = document.getElementById('reminder-list');
+        reminderList.innerHTML = '';
+
+        this.data.reminders.forEach((reminder, index) => {
+            const reminderElement = document.createElement('div');
+            reminderElement.className = 'reminder-item';
+            reminderElement.innerHTML = `
+                <span class="reminder-text">${reminder.text}</span>
+                <div class="reminder-actions">
+                    <button class="btn btn-small btn-danger" onclick="app.removeReminder(${index})">Remove</button>
+                </div>
+            `;
+            reminderList.appendChild(reminderElement);
+        });
+    }
+
+    addReminder() {
+        const input = document.getElementById('reminder-input');
+        const text = input.value.trim();
+
+        if (text) {
+            this.data.reminders.push({
+                text: text,
+                timestamp: Date.now()
+            });
+
+            input.value = '';
+            this.saveToStorage();
+            this.renderReminders();
+        }
+    }
+
+    removeReminder(index) {
+        this.data.reminders.splice(index, 1);
+        this.saveToStorage();
+        this.renderReminders();
+    }
+
+    updateTheme() {
+        document.body.className = this.data.theme;
+        if (document.getElementById('theme-select')) {
+            document.getElementById('theme-select').value = this.data.theme;
+        }
+    }
+
+    changeTheme(e) {
+        this.data.theme = e.target.value;
+        this.updateTheme();
+        this.saveToStorage();
+    }
+
+    toggleLayoutDesign(e) {
+        this.data.layoutDesignEnabled = e.target.checked;
+        this.saveToStorage();
+    }
+
+    playSound(type) {
+        // Placeholder for sound effects
+        console.log(`Playing ${type} sound`);
+    }
+
+    showToast(message, type) {
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+
+        document.body.appendChild(toast);
+
+        // Remove after animation
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 10);
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 300);
+        }, 3000);
+    }
+
+    enableTestMode() {
+        this.data.testMode = true;
+        this.data.dreamText = "This is a test dream. In test mode, you can skip the 500-word requirement and jump straight to the dashboard. This is useful for development and testing.";
+        
+        // Initialize with sample data
+        if (!this.data.startDate) {
+            this.data.startDate = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(); // 2 days ago
+            
+            // Initialize 90 days of data
+            const start = new Date(this.data.startDate);
+            for (let i = 0; i < 90; i++) {
+                const dayDate = new Date(start);
+                dayDate.setDate(start.getDate() + i);
+                
+                this.data.days.push({
+                    date: dayDate.toISOString(),
+                    checklist: {
+                        shower: i < 2, // Past 2 days completed
+                        clean: i < 2,
+                        pushups: i < 2,
+                        journalDone: i < 2
+                    },
+                    pushupTarget: 25 + i,
+                    journal: {
+                        gratitude: ['Test gratitude 1', 'Test gratitude 2', 'Test gratitude 3'],
+                        summary: 'Test summary for day ' + (i + 1),
+                        rating: 7
+                    },
+                    status: i === 2 ? 'current' : i < 2 ? 'past' : 'future',
+                    timestamp: Date.now()
+                });
+            }
+            
+            // Set some stats
+            this.data.stats = {
+                currentWinStreak: 2,
+                longestWinStreak: 2,
+                currentLossStreak: 0,
+                daysWon: 2,
+                daysLost: 0
+            };
+        }
+        
+        this.saveToStorage();
+    }
+
+    // Add user ID generation and cloud sync functionality
+    generateUserId() {
+        // Generate a unique user ID if one doesn't exist
+        if (!this.data.userId) {
+            this.data.userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            this.saveToStorage();
+        }
+        return this.data.userId;
+    }
+    
+    async syncToCloud() {
+        try {
+            const userId = this.generateUserId();
+            const response = await fetch('/api/sync', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: userId,
+                    data: this.data
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Sync failed');
+            }
+            
+            const result = await response.json();
+            console.log('Data synced successfully:', result);
+        } catch (error) {
+            console.error('Sync error:', error);
+            // Fallback to localStorage
+            localStorage.setItem('winTrackerData', JSON.stringify(this.data));
+        }
+    }
+    
+    async loadFromCloud() {
+        try {
+            const userId = this.generateUserId();
+            const response = await fetch(`/api/sync/${userId}`);
+            
+            if (response.ok) {
+                const cloudData = await response.json();
+                if (cloudData && cloudData.data) {
+                    // Merge cloud data with local data, prioritizing newer timestamps
+                    this.data = this.mergeData(this.data, cloudData.data);
+                    this.saveToStorage();
+                    return true;
+                }
+            }
+        } catch (error) {
+            console.error('Load from cloud error:', error);
+        }
+        return false;
+    }
+    
+    mergeData(localData, cloudData) {
+        // Simple merge strategy - use cloud data but preserve local if it's more recent
+        // In a real implementation, you'd want more sophisticated conflict resolution
+        const merged = {...localData, ...cloudData};
+        
+        // Preserve local stats if they seem more up-to-date
+        if (localData.stats && cloudData.stats) {
+            // Keep the stats with higher values (assuming higher values mean more recent activity)
+            merged.stats = {
+                currentWinStreak: Math.max(localData.stats.currentWinStreak || 0, cloudData.stats.currentWinStreak || 0),
+                longestWinStreak: Math.max(localData.stats.longestWinStreak || 0, cloudData.stats.longestWinStreak || 0),
+                currentLossStreak: Math.max(localData.stats.currentLossStreak || 0, cloudData.stats.currentLossStreak || 0),
+                daysWon: Math.max(localData.stats.daysWon || 0, cloudData.stats.daysWon || 0),
+                daysLost: Math.max(localData.stats.daysLost || 0, cloudData.stats.daysLost || 0)
+            };
+        }
+        
+        // Preserve local days data if it exists and has more recent updates
+        if (localData.days && cloudData.days) {
+            // For simplicity, we'll use the cloud data but this could be improved
+            merged.days = cloudData.days;
+        }
+        
+        return merged;
+    }
+}
+
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    const appInstance = new WinTrackerApp();
+    window.app = appInstance; // Expose for debugging
+    
+    // Attempt to load data from cloud
+    setTimeout(() => {
+        appInstance.loadFromCloud();
+    }, 1000); // Delay to allow UI to load first
+});
+
+// Export for testing purposes
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = WinTrackerApp;
+}
+
+
+
+    // RPG Game Mechanics
+    calculateStreakMultiplier() {
+        const { streakMultiplierIncrement, streakMultiplierInterval, maxStreakMultiplier } = this.gameConfig;
+        const multiplier = 1 + Math.min(maxStreakMultiplier - 1, 
+            Math.floor(this.data.gameState.streak.current / streakMultiplierInterval) * streakMultiplierIncrement);
+        return Math.min(maxStreakMultiplier, multiplier);
+    }
+
+    getXpForLevel(level) {
+        const { levelCurveBase, levelCurveFactor } = this.gameConfig;
+        return levelCurveBase + Math.pow(level - 1, 2) * levelCurveFactor;
+    }
+
+    getNextLevelXp() {
+        return this.getXpForLevel(this.data.gameState.xp.level + 1);
+    }
+
+    gainXp(amount) {
+        const multiplier = this.calculateStreakMultiplier();
+        const finalAmount = Math.floor(amount * multiplier);
+        
+        this.data.gameState.xp.currentXP += finalAmount;
+        this.data.gameState.xp.totalXP += finalAmount;
+        
+        // Check for level up
+        const nextLevelXp = this.getNextLevelXp();
+        if (this.data.gameState.xp.currentXP >= nextLevelXp && 
+            this.data.gameState.xp.level < this.gameConfig.maxLevel) {
+            this.levelUp();
+        }
+        
+        this.updateDashboard();
+        return finalAmount;
+    }
+
+    levelUp() {
+        this.data.gameState.xp.currentXP -= this.getNextLevelXp();
+        this.data.gameState.xp.level++;
+        
+        // Show level up animation
+        this.showLevelUpAnimation();
+    }
+
+    showLevelUpAnimation() {
+        // Create level up effect
+        this.showToast(LEVEL UP! Reached Level !, 'success');
+        
+        // Add visual effect to dashboard
+        const levelDisplay = document.querySelector('.xp-display');
+        if (levelDisplay) {
+            levelDisplay.classList.add('level-up-animation');
+            setTimeout(() => {
+                levelDisplay.classList.remove('level-up-animation');
+            }, 2000);
+        }
+    }
+
+    gainCoins(amount) {
+        const multiplier = this.calculateStreakMultiplier();
+        const finalAmount = Math.floor(amount * multiplier);
+        this.data.gameState.coins += finalAmount;
+        this.updateDashboard();
+        return finalAmount;
+    }
+
+    processTaskCompletion(taskName) {
+        // Give reward for completing a task
+        this.gainXp(this.gameConfig.baseXPPerTask);
+        this.gainCoins(this.gameConfig.baseCoinsPerTask);
+    }
+
+    processAllTasksCompleted() {
+        // Bonus for completing all 4 tasks
+        this.gainXp(this.gameConfig.bonusXPForAllTasks);
+        this.gainCoins(this.gameConfig.bonusCoinsForAllTasks);
+        
+        // Increase streak
+        this.increaseStreak();
+        
+        // Check for shield reward
+        this.checkShieldReward();
+    }
+
+    increaseStreak() {
+        this.data.gameState.streak.current++;
+        if (this.data.gameState.streak.current > this.data.gameState.streak.best) {
+            this.data.gameState.streak.best = this.data.gameState.streak.current;
+        }
+        
+        // Show streak increase effect
+        this.showStreakIncreaseEffect();
+    }
+
+    showStreakIncreaseEffect() {
+        this.showToast( Streak: !, 'success');
+        
+        // Add visual effect
+        const streakDisplay = document.querySelector('.streak-display');
+        if (streakDisplay) {
+            streakDisplay.classList.add('streak-animation');
+            setTimeout(() => {
+                streakDisplay.classList.remove('streak-animation');
+            }, 1000);
+        }
+    }
+
+    resetStreak() {
+        // Check if we have a shield
+        if (this.data.gameState.streak.shields > 0) {
+            this.data.gameState.streak.shields--;
+            // Don't reset to 0, just don't increase
+            this.showToast(' Shield protected your streak!', 'info');
+        } else {
+            this.data.gameState.streak.current = 0;
+            this.showToast(' Streak broken! Keep going!', 'error');
+        }
+    }
+
+    checkShieldReward() {
+        // Award a shield every N days of streak
+        if (this.data.gameState.streak.current % this.gameConfig.shieldRewardInterval === 0 && 
+            this.data.gameState.streak.current > 0) {
+            this.data.gameState.streak.shields++;
+            this.showToast( Shield rewarded! You now have  shield(s), 'success');
+        }
+    }
+
+    processEndOfDayIfNeeded() {
+        if (!this.data.startDate) return;
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        // Get current day index
+        const startDate = new Date(this.data.startDate);
+        const currentDayIndex = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+        
+        if (currentDayIndex < 0 || currentDayIndex >= this.data.days.length) return;
+        
+        const day = this.data.days[currentDayIndex];
+        
+        // Check if we need to process end of day for this day
+        const todayStr = today.toISOString().split('T')[0];
+        const lastProcessedDate = this.data.gameState.streak.lastCompleteDate;
+        
+        if (lastProcessedDate !== todayStr) {
+            // Check if all tasks were completed
+            const allCompleted = Object.values(day.checklist).every(completed => completed);
+            
+            if (allCompleted) {
+                this.processAllTasksCompleted();
+                this.data.gameState.streak.lastCompleteDate = todayStr;
+            } else {
+                this.resetStreak();
+                this.data.gameState.streak.lastCompleteDate = todayStr;
+            }
+        }
+    }
+
+
+    // RPG Game Mechanics
+    calculateStreakMultiplier() {
+        const { streakMultiplierIncrement, streakMultiplierInterval, maxStreakMultiplier } = this.gameConfig;
+        const multiplier = 1 + Math.min(maxStreakMultiplier - 1, 
+            Math.floor(this.data.gameState.streak.current / streakMultiplierInterval) * streakMultiplierIncrement);
+        return Math.min(maxStreakMultiplier, multiplier);
+    }
+
+    getXpForLevel(level) {
+        const { levelCurveBase, levelCurveFactor } = this.gameConfig;
+        return levelCurveBase + Math.pow(level - 1, 2) * levelCurveFactor;
+    }
+
+    getNextLevelXp() {
+        return this.getXpForLevel(this.data.gameState.xp.level + 1);
+    }
+
+    gainXp(amount) {
+        const multiplier = this.calculateStreakMultiplier();
+        const finalAmount = Math.floor(amount * multiplier);
+        
+        this.data.gameState.xp.currentXP += finalAmount;
+        this.data.gameState.xp.totalXP += finalAmount;
+        
+        // Check for level up
+        const nextLevelXp = this.getNextLevelXp();
+        if (this.data.gameState.xp.currentXP >= nextLevelXp && 
+            this.data.gameState.xp.level < this.gameConfig.maxLevel) {
+            this.levelUp();
+        }
+        
+        this.updateDashboard();
+        return finalAmount;
+    }
+
+    levelUp() {
+        this.data.gameState.xp.currentXP -= this.getNextLevelXp();
+        this.data.gameState.xp.level++;
+        
+        // Show level up animation
+        this.showLevelUpAnimation();
+    }
+
+    showLevelUpAnimation() {
+        // Create level up effect
+        this.showToast('LEVEL UP! Reached Level ' + this.data.gameState.xp.level + '!', 'success');
+        
+        // Add visual effect to dashboard
+        var levelDisplay = document.querySelector('.xp-display');
+        if (levelDisplay) {
+            levelDisplay.classList.add('level-up-animation');
+            setTimeout(function() {
+                levelDisplay.classList.remove('level-up-animation');
+            }, 2000);
+        }
+    }
+
+    gainCoins(amount) {
+        const multiplier = this.calculateStreakMultiplier();
+        const finalAmount = Math.floor(amount * multiplier);
+        this.data.gameState.coins += finalAmount;
+        this.updateDashboard();
+        return finalAmount;
+    }
+
+    processTaskCompletion(taskName) {
+        // Give reward for completing a task
+        this.gainXp(this.gameConfig.baseXPPerTask);
+        this.gainCoins(this.gameConfig.baseCoinsPerTask);
+    }
+
+    processAllTasksCompleted() {
+        // Bonus for completing all 4 tasks
+        this.gainXp(this.gameConfig.bonusXPForAllTasks);
+        this.gainCoins(this.gameConfig.bonusCoinsForAllTasks);
+        
+        // Increase streak
+        this.increaseStreak();
+        
+        // Check for shield reward
+        this.checkShieldReward();
+    }
+
+    increaseStreak() {
+        this.data.gameState.streak.current++;
+        if (this.data.gameState.streak.current > this.data.gameState.streak.best) {
+            this.data.gameState.streak.best = this.data.gameState.streak.current;
+        }
+        
+        // Show streak increase effect
+        this.showStreakIncreaseEffect();
+    }
+
+    showStreakIncreaseEffect() {
+        this.showToast(' Streak: ' + this.data.gameState.streak.current + '!', 'success');
+        
+        // Add visual effect
+        var streakDisplay = document.querySelector('.streak-display');
+        if (streakDisplay) {
+            streakDisplay.classList.add('streak-animation');
+            setTimeout(function() {
+                streakDisplay.classList.remove('streak-animation');
+            }, 1000);
+        }
+    }
+
+    resetStreak() {
+        // Check if we have a shield
+        if (this.data.gameState.streak.shields > 0) {
+            this.data.gameState.streak.shields--;
+            // Don't reset to 0, just don't increase
+            this.showToast(' Shield protected your streak!', 'info');
+        } else {
+            this.data.gameState.streak.current = 0;
+            this.showToast(' Streak broken! Keep going!', 'error');
+        }
+    }
+
+    checkShieldReward() {
+        // Award a shield every N days of streak
+        if (this.data.gameState.streak.current % this.gameConfig.shieldRewardInterval === 0 && 
+            this.data.gameState.streak.current > 0) {
+            this.data.gameState.streak.shields++;
+            this.showToast(' Shield rewarded! You now have ' + this.data.gameState.streak.shields + ' shield(s)', 'success');
+        }
+    }
+
+    processEndOfDayIfNeeded() {
+        if (!this.data.startDate) return;
+        
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        // Get current day index
+        var startDate = new Date(this.data.startDate);
+        var currentDayIndex = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+        
+        if (currentDayIndex < 0 || currentDayIndex >= this.data.days.length) return;
+        
+        var day = this.data.days[currentDayIndex];
+        
+        // Check if we need to process end of day for this day
+        var todayStr = today.toISOString().split('T')[0];
+        var lastProcessedDate = this.data.gameState.streak.lastCompleteDate;
+        
+        if (lastProcessedDate !== todayStr) {
+            // Check if all tasks were completed
+            var allCompleted = Object.values(day.checklist).every(function(completed) { return completed; });
+            
+            if (allCompleted) {
+                this.processAllTasksCompleted();
+                this.data.gameState.streak.lastCompleteDate = todayStr;
+            } else {
+                this.resetStreak();
+                this.data.gameState.streak.lastCompleteDate = todayStr;
+            }
+        }
+    }
+

@@ -4,6 +4,59 @@ class WinTrackerApp {
     constructor() {
         this.data = this.loadFromStorage();
         this.currentView = 'landing';
+        
+        // Game configuration
+        this.gameConfig = {
+            // Task rewards
+            baseXPPerTask: 10,
+            baseCoinsPerTask: 5,
+            bonusXPForAllTasks: 20,
+            bonusCoinsForAllTasks: 10,
+            
+            // Streak multiplier
+            streakMultiplierIncrement: 0.1, // +0.1 every X days
+            streakMultiplierInterval: 3,
+            maxStreakMultiplier: 2.0,
+            
+            // Level curve
+            levelCurveBase: 100,
+            levelCurveFactor: 35,
+            maxLevel: 50,
+            
+            // Crate costs
+            basicCrateCost: 50,
+            premiumCrateCost: 150,
+            
+            // Shield mechanics
+            shieldRewardInterval: 14,
+            
+            // Drop rates (percentages) for Basic Crate
+            basicCrateDrops: {
+                common: 70,
+                uncommon: 20,
+                rare: 8,
+                epic: 1.8,
+                legendary: 0.2
+            },
+            
+            // Drop rates (percentages) for Premium Crate
+            premiumCrateDrops: {
+                common: 45,
+                uncommon: 30,
+                rare: 18,
+                epic: 6,
+                legendary: 1
+            },
+            
+            // Duplicate refund values
+            duplicateRefund: {
+                common: 5,
+                uncommon: 10,
+                rare: 25,
+                epic: 60,
+                legendary: 150
+            }
+        };
 
         // Check for test mode parameter
         const urlParams = new URLSearchParams(window.location.search);
@@ -87,7 +140,12 @@ class WinTrackerApp {
     loadFromStorage() {
         const savedData = localStorage.getItem('winTrackerData');
         if (savedData) {
-            return JSON.parse(savedData);
+            const data = JSON.parse(savedData);
+            // Ensure game state exists
+            if (!data.gameState) {
+                data.gameState = this.getDefaultGameState();
+            }
+            return data;
         }
 
         // Default data structure
@@ -108,11 +166,37 @@ class WinTrackerApp {
                 daysWon: 0,
                 daysLost: 0
             },
+            gameState: this.getDefaultGameState(),
             userId: null  // Added for cloud sync
         };
     }
 
+    getDefaultGameState() {
+        return {
+            version: 2,
+            streak: {
+                current: 0,
+                best: 0,
+                lastCompleteDate: null,
+                shields: 0
+            },
+            xp: {
+                level: 1,
+                currentXP: 0,
+                totalXP: 0
+            },
+            coins: 0,
+            cosmetics: {
+                owned: {},
+                equipped: {}
+            },
+            crateHistory: []
+        };
+    }
+
     saveToStorage() {
+        // Auto-save game state before storing
+        this.processEndOfDayIfNeeded();
         localStorage.setItem('winTrackerData', JSON.stringify(this.data));
         
         // Attempt to sync to cloud if user has an ID
@@ -208,44 +292,7 @@ class WinTrackerApp {
         this.updateDashboard();
     }
 
-    updateDashboard() {
-        if (!this.data.startDate) return;
-
-        const currentDate = new Date();
-        const startDate = new Date(this.data.startDate);
-        const currentDayIndex = Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24));
-        
-        // Update current day info
-        document.getElementById('current-date').textContent = currentDate.toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-        
-        document.getElementById('current-day').textContent = Math.max(1, currentDayIndex + 1);
-
-        // Update streaks
-        this.updateStreaks();
-
-        // Update daily actions
-        this.updateDailyActions(currentDayIndex);
-
-        // Update journal
-        this.updateJournal(currentDayIndex);
-
-        // Update calendar
-        this.renderCalendar();
-
-        // Update to-do list
-        this.renderTodoList();
-
-        // Update dream text section
-        this.updateDreamTextSection();
-        
-        // Update reminders
-        this.renderReminders();
-    }
+    updateDashboard() {\n        if (!this.data.startDate) return;\n\n        const currentDate = new Date();\n        const startDate = new Date(this.data.startDate);\n        const currentDayIndex = Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24));\n        \n        // Update current day info\n        document.getElementById('current-date').textContent = currentDate.toLocaleDateString('en-US', {\n            weekday: 'long',\n            year: 'numeric',\n            month: 'long',\n            day: 'numeric'\n        });\n        \n        document.getElementById('current-day').textContent = Math.max(1, currentDayIndex + 1);\n\n        // Update streaks\n        this.updateStreaks();\n\n        // Update RPG stats\n        this.updateRPGStats();\n\n        // Update daily actions\n        this.updateDailyActions(currentDayIndex);\n\n        // Update journal\n        this.updateJournal(currentDayIndex);\n\n        // Update calendar\n        this.renderCalendar();\n\n        // Update to-do list\n        this.renderTodoList();\n\n        // Update dream text section\n        this.updateDreamTextSection();\n        \n        // Update reminders\n        this.renderReminders();\n        \n        // Update character\n        this.renderCharacter();\n    }\n\n    updateRPGStats() {\n        // Update streak display\n        if (document.getElementById('current-streak')) {\n            document.getElementById('current-streak').textContent = this.data.gameState.streak.current;\n        }\n        \n        // Update best streak display\n        if (document.getElementById('best-streak')) {\n            document.getElementById('best-streak').textContent = this.data.gameState.streak.best;\n        }\n        \n        // Update shields display\n        if (document.getElementById('shield-count')) {\n            document.getElementById('shield-count').textContent = this.data.gameState.streak.shields;\n        }\n        \n        // Update XP display\n        if (document.getElementById('current-xp')) {\n            document.getElementById('current-xp').textContent = this.data.gameState.xp.currentXP;\n        }\n        \n        if (document.getElementById('xp-level')) {\n            document.getElementById('xp-level').textContent = this.data.gameState.xp.level;\n        }\n        \n        // Update XP progress bar\n        if (document.getElementById('xp-progress')) {\n            const nextLevelXp = this.getNextLevelXp();\n            const progressPercent = (this.data.gameState.xp.currentXP / nextLevelXp) * 100;\n            document.getElementById('xp-progress').style.width = Math.min(100, progressPercent) + '%';\n        }\n        \n        // Update coins display\n        if (document.getElementById('coin-count')) {\n            document.getElementById('coin-count').textContent = this.data.gameState.coins;\n        }\n        \n        // Update streak multiplier\n        if (document.getElementById('streak-multiplier')) {\n            const multiplier = this.calculateStreakMultiplier();\n            document.getElementById('streak-multiplier').textContent = multiplier.toFixed(1) + 'x';\n        }\n    }
 
     updateStreaks() {
         const { currentWinStreak, longestWinStreak, currentLossStreak } = this.data.stats;
@@ -393,7 +440,17 @@ class WinTrackerApp {
         
         if (dayIndex < 0 || dayIndex >= this.data.days.length) return;
 
-        this.data.days[dayIndex].checklist[taskName] = e.target.checked;
+        // Only allow marking as done, not undone
+        if (e.target.checked && !this.data.days[dayIndex].checklist[taskName]) {
+            this.data.days[dayIndex].checklist[taskName] = true;
+            
+            // Process task completion for RPG rewards
+            this.processTaskCompletion(taskName);
+        } else if (!e.target.checked) {
+            // Prevent unchecking completed tasks
+            e.target.checked = this.data.days[dayIndex].checklist[taskName];
+            return;
+        }
         
         // If journal is marked as done, validate it
         if (taskName === 'journalDone' && e.target.checked) {
@@ -791,4 +848,325 @@ document.addEventListener('DOMContentLoaded', () => {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = WinTrackerApp;
 }
+
+
+
+    // RPG Game Mechanics
+    calculateStreakMultiplier() {
+        const { streakMultiplierIncrement, streakMultiplierInterval, maxStreakMultiplier } = this.gameConfig;
+        const multiplier = 1 + Math.min(maxStreakMultiplier - 1, 
+            Math.floor(this.data.gameState.streak.current / streakMultiplierInterval) * streakMultiplierIncrement);
+        return Math.min(maxStreakMultiplier, multiplier);
+    }
+
+    getXpForLevel(level) {
+        const { levelCurveBase, levelCurveFactor } = this.gameConfig;
+        return levelCurveBase + Math.pow(level - 1, 2) * levelCurveFactor;
+    }
+
+    getNextLevelXp() {
+        return this.getXpForLevel(this.data.gameState.xp.level + 1);
+    }
+
+    gainXp(amount) {
+        const multiplier = this.calculateStreakMultiplier();
+        const finalAmount = Math.floor(amount * multiplier);
+        
+        this.data.gameState.xp.currentXP += finalAmount;
+        this.data.gameState.xp.totalXP += finalAmount;
+        
+        // Check for level up
+        const nextLevelXp = this.getNextLevelXp();
+        if (this.data.gameState.xp.currentXP >= nextLevelXp && 
+            this.data.gameState.xp.level < this.gameConfig.maxLevel) {
+            this.levelUp();
+        }
+        
+        this.updateDashboard();
+        return finalAmount;
+    }
+
+    levelUp() {
+        this.data.gameState.xp.currentXP -= this.getNextLevelXp();
+        this.data.gameState.xp.level++;
+        
+        // Show level up animation
+        this.showLevelUpAnimation();
+    }
+
+    showLevelUpAnimation() {
+        // Create level up effect
+        this.showToast(LEVEL UP! Reached Level !, 'success');
+        
+        // Add visual effect to dashboard
+        const levelDisplay = document.querySelector('.xp-display');
+        if (levelDisplay) {
+            levelDisplay.classList.add('level-up-animation');
+            setTimeout(() => {
+                levelDisplay.classList.remove('level-up-animation');
+            }, 2000);
+        }
+    }
+
+    gainCoins(amount) {
+        const multiplier = this.calculateStreakMultiplier();
+        const finalAmount = Math.floor(amount * multiplier);
+        this.data.gameState.coins += finalAmount;
+        this.updateDashboard();
+        return finalAmount;
+    }
+
+    processTaskCompletion(taskName) {
+        // Give reward for completing a task
+        this.gainXp(this.gameConfig.baseXPPerTask);
+        this.gainCoins(this.gameConfig.baseCoinsPerTask);
+    }
+
+    processAllTasksCompleted() {
+        // Bonus for completing all 4 tasks
+        this.gainXp(this.gameConfig.bonusXPForAllTasks);
+        this.gainCoins(this.gameConfig.bonusCoinsForAllTasks);
+        
+        // Increase streak
+        this.increaseStreak();
+        
+        // Check for shield reward
+        this.checkShieldReward();
+    }
+
+    increaseStreak() {
+        this.data.gameState.streak.current++;
+        if (this.data.gameState.streak.current > this.data.gameState.streak.best) {
+            this.data.gameState.streak.best = this.data.gameState.streak.current;
+        }
+        
+        // Show streak increase effect
+        this.showStreakIncreaseEffect();
+    }
+
+    showStreakIncreaseEffect() {
+        this.showToast( Streak: !, 'success');
+        
+        // Add visual effect
+        const streakDisplay = document.querySelector('.streak-display');
+        if (streakDisplay) {
+            streakDisplay.classList.add('streak-animation');
+            setTimeout(() => {
+                streakDisplay.classList.remove('streak-animation');
+            }, 1000);
+        }
+    }
+
+    resetStreak() {
+        // Check if we have a shield
+        if (this.data.gameState.streak.shields > 0) {
+            this.data.gameState.streak.shields--;
+            // Don't reset to 0, just don't increase
+            this.showToast(' Shield protected your streak!', 'info');
+        } else {
+            this.data.gameState.streak.current = 0;
+            this.showToast(' Streak broken! Keep going!', 'error');
+        }
+    }
+
+    checkShieldReward() {
+        // Award a shield every N days of streak
+        if (this.data.gameState.streak.current % this.gameConfig.shieldRewardInterval === 0 && 
+            this.data.gameState.streak.current > 0) {
+            this.data.gameState.streak.shields++;
+            this.showToast( Shield rewarded! You now have  shield(s), 'success');
+        }
+    }
+
+    processEndOfDayIfNeeded() {
+        if (!this.data.startDate) return;
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        // Get current day index
+        const startDate = new Date(this.data.startDate);
+        const currentDayIndex = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+        
+        if (currentDayIndex < 0 || currentDayIndex >= this.data.days.length) return;
+        
+        const day = this.data.days[currentDayIndex];
+        
+        // Check if we need to process end of day for this day
+        const todayStr = today.toISOString().split('T')[0];
+        const lastProcessedDate = this.data.gameState.streak.lastCompleteDate;
+        
+        if (lastProcessedDate !== todayStr) {
+            // Check if all tasks were completed
+            const allCompleted = Object.values(day.checklist).every(completed => completed);
+            
+            if (allCompleted) {
+                this.processAllTasksCompleted();
+                this.data.gameState.streak.lastCompleteDate = todayStr;
+            } else {
+                this.resetStreak();
+                this.data.gameState.streak.lastCompleteDate = todayStr;
+            }
+        }
+    }
+
+
+    // RPG Game Mechanics
+    calculateStreakMultiplier() {
+        const { streakMultiplierIncrement, streakMultiplierInterval, maxStreakMultiplier } = this.gameConfig;
+        const multiplier = 1 + Math.min(maxStreakMultiplier - 1, 
+            Math.floor(this.data.gameState.streak.current / streakMultiplierInterval) * streakMultiplierIncrement);
+        return Math.min(maxStreakMultiplier, multiplier);
+    }
+
+    getXpForLevel(level) {
+        const { levelCurveBase, levelCurveFactor } = this.gameConfig;
+        return levelCurveBase + Math.pow(level - 1, 2) * levelCurveFactor;
+    }
+
+    getNextLevelXp() {
+        return this.getXpForLevel(this.data.gameState.xp.level + 1);
+    }
+
+    gainXp(amount) {
+        const multiplier = this.calculateStreakMultiplier();
+        const finalAmount = Math.floor(amount * multiplier);
+        
+        this.data.gameState.xp.currentXP += finalAmount;
+        this.data.gameState.xp.totalXP += finalAmount;
+        
+        // Check for level up
+        const nextLevelXp = this.getNextLevelXp();
+        if (this.data.gameState.xp.currentXP >= nextLevelXp && 
+            this.data.gameState.xp.level < this.gameConfig.maxLevel) {
+            this.levelUp();
+        }
+        
+        this.updateDashboard();
+        return finalAmount;
+    }
+
+    levelUp() {
+        this.data.gameState.xp.currentXP -= this.getNextLevelXp();
+        this.data.gameState.xp.level++;
+        
+        // Show level up animation
+        this.showLevelUpAnimation();
+    }
+
+    showLevelUpAnimation() {
+        // Create level up effect
+        this.showToast('LEVEL UP! Reached Level ' + this.data.gameState.xp.level + '!', 'success');
+        
+        // Add visual effect to dashboard
+        var levelDisplay = document.querySelector('.xp-display');
+        if (levelDisplay) {
+            levelDisplay.classList.add('level-up-animation');
+            setTimeout(function() {
+                levelDisplay.classList.remove('level-up-animation');
+            }, 2000);
+        }
+    }
+
+    gainCoins(amount) {
+        const multiplier = this.calculateStreakMultiplier();
+        const finalAmount = Math.floor(amount * multiplier);
+        this.data.gameState.coins += finalAmount;
+        this.updateDashboard();
+        return finalAmount;
+    }
+
+    processTaskCompletion(taskName) {
+        // Give reward for completing a task
+        this.gainXp(this.gameConfig.baseXPPerTask);
+        this.gainCoins(this.gameConfig.baseCoinsPerTask);
+    }
+
+    processAllTasksCompleted() {
+        // Bonus for completing all 4 tasks
+        this.gainXp(this.gameConfig.bonusXPForAllTasks);
+        this.gainCoins(this.gameConfig.bonusCoinsForAllTasks);
+        
+        // Increase streak
+        this.increaseStreak();
+        
+        // Check for shield reward
+        this.checkShieldReward();
+    }
+
+    increaseStreak() {
+        this.data.gameState.streak.current++;
+        if (this.data.gameState.streak.current > this.data.gameState.streak.best) {
+            this.data.gameState.streak.best = this.data.gameState.streak.current;
+        }
+        
+        // Show streak increase effect
+        this.showStreakIncreaseEffect();
+    }
+
+    showStreakIncreaseEffect() {
+        this.showToast(' Streak: ' + this.data.gameState.streak.current + '!', 'success');
+        
+        // Add visual effect
+        var streakDisplay = document.querySelector('.streak-display');
+        if (streakDisplay) {
+            streakDisplay.classList.add('streak-animation');
+            setTimeout(function() {
+                streakDisplay.classList.remove('streak-animation');
+            }, 1000);
+        }
+    }
+
+    resetStreak() {
+        // Check if we have a shield
+        if (this.data.gameState.streak.shields > 0) {
+            this.data.gameState.streak.shields--;
+            // Don't reset to 0, just don't increase
+            this.showToast(' Shield protected your streak!', 'info');
+        } else {
+            this.data.gameState.streak.current = 0;
+            this.showToast(' Streak broken! Keep going!', 'error');
+        }
+    }
+
+    checkShieldReward() {
+        // Award a shield every N days of streak
+        if (this.data.gameState.streak.current % this.gameConfig.shieldRewardInterval === 0 && 
+            this.data.gameState.streak.current > 0) {
+            this.data.gameState.streak.shields++;
+            this.showToast(' Shield rewarded! You now have ' + this.data.gameState.streak.shields + ' shield(s)', 'success');
+        }
+    }
+
+    processEndOfDayIfNeeded() {
+        if (!this.data.startDate) return;
+        
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        // Get current day index
+        var startDate = new Date(this.data.startDate);
+        var currentDayIndex = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+        
+        if (currentDayIndex < 0 || currentDayIndex >= this.data.days.length) return;
+        
+        var day = this.data.days[currentDayIndex];
+        
+        // Check if we need to process end of day for this day
+        var todayStr = today.toISOString().split('T')[0];
+        var lastProcessedDate = this.data.gameState.streak.lastCompleteDate;
+        
+        if (lastProcessedDate !== todayStr) {
+            // Check if all tasks were completed
+            var allCompleted = Object.values(day.checklist).every(function(completed) { return completed; });
+            
+            if (allCompleted) {
+                this.processAllTasksCompleted();
+                this.data.gameState.streak.lastCompleteDate = todayStr;
+            } else {
+                this.resetStreak();
+                this.data.gameState.streak.lastCompleteDate = todayStr;
+            }
+        }
+    }
 
