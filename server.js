@@ -1,6 +1,5 @@
 const express = require('express');
 const path = require('path');
-const fs = require('fs').promises;
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -55,8 +54,8 @@ app.get('/api/sync/:userId', async (req, res) => {
   }
 });
 
-// Route to serve index.html for all routes
-app.get('*', (req, res) => {
+// Serve index.html for all routes
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
